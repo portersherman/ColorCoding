@@ -10,7 +10,7 @@ import javax.imageio.ImageIO;
 /* File: Comp.java
 /*
 /* Comp implements an iterative image filter based on the decomposition and
-/* reconstruction of the imput image. The effect makes use of a number of
+/* reconstruction of the input image. The effect makes use of a number of
 /* transformations. At progressively finer resolutions, the input image is
 /* pixellated, then separated out into RGB and CMY channels. Then, each
 /* pixellation in each channel is radiused according to the luminosity of the
