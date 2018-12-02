@@ -24,4 +24,13 @@ by the BufferedImage data type.
 Pixel objects store RGBA values and provide methods to implement useful
 operations.
 
+## Building
+
+Build from CLI using command: `javac Comp.java`
+Tested using Java 1.8
+
+## Running
+
+Run from CLI using command: `java Comp <filename> <depth> <version string>`
+
 Author: Porter Sherman
