@@ -12,9 +12,9 @@ import javax.imageio.ImageIO;
 /* Comp implements an iterative image filter based on the decomposition and
 /* reconstruction of the input image. The effect makes use of a number of
 /* transformations. At progressively finer resolutions, the input image is
-/* pixellated, then separated out into RGB and CMY channels. Then, each
-/* pixellation in each channel is radiused according to the luminosity of the
-/* pixellation, and offset from center. These circles are then overlaid,
+/* pixelated, then separated out into RGB and CMY channels. Then, each
+/* pixelation in each channel is radiused according to the luminosity of the
+/* pixelation, and offset from center. These circles are then overlaid,
 /* creating the familiar patterns that connote color spaces. The overlaying is
 /* performed with either a lighten or darken blend mode, depending on the color
 /* space. After all levels have been computed, the results are composited
@@ -34,8 +34,7 @@ public class Comp {
 
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.out.println("please supply filename as first argument and ____ as second argument");
-            System.out.println("alternatively, type 'help' for more information");
+            System.out.println("* type 'help' for more information");
             return;
         }
 
@@ -43,6 +42,7 @@ public class Comp {
             System.out.println("* first argument: filename");
             System.out.println("* second argument: resolution depth");
             System.out.println("* third argument: version");
+            System.out.println("* fourth argument: \"prime\" or \"binary\" levels");
             return;
         }
 
@@ -52,14 +52,14 @@ public class Comp {
             // marshall buffere image object into ImageData object
             ImageData imgData = new ImageData(inImg);
             // run CMY and RGB color space filters sequentially
-            compCMY(imgData, Integer.parseInt(args[1]), args[0].substring(0, args[0].indexOf('.', 0)), (args[2] != null) ? args[2] : "");
-            compRGB(imgData, Integer.parseInt(args[1]), args[0].substring(0, args[0].indexOf('.', 0)), (args[2] != null) ? args[2] : "");
+            compCMY(imgData, Integer.parseInt(args[1]), args[0].substring(0, args[0].indexOf('.', 0)), (args[2] != null) ? args[2] : "", args[3].equals("prime"));
+            compRGB(imgData, Integer.parseInt(args[1]), args[0].substring(0, args[0].indexOf('.', 0)), (args[2] != null) ? args[2] : "", args[3].equals("prime"));
         } catch (IOException e) {
             System.out.println(e);
         }
     }
 
-    public static void compCMY(ImageData imgData, int levels, String fileName, String version) {
+    public static void compCMY(ImageData imgData, int levels, String fileName, String version, boolean prime) {
         long start = System.currentTimeMillis();
 
         // create results array for future compositing
@@ -73,8 +73,11 @@ public class Comp {
                 break;
             }
 
-            // size of pixel post-pixellation
-            int size = (int) ((double) imgData.getWidth() / Math.pow(randomLevels[i], 2));
+            // size of pixel post-pixelation
+            int size = ((prime) ?
+                (int) ((double) imgData.getWidth() / Math.pow(randomLevels[i], 2))
+                :
+                (int) ((double) imgData.getWidth() / Math.pow(2, i)));
 
             // max resolution for efficiency and fidelity
             if (size < 7) {
@@ -89,8 +92,8 @@ public class Comp {
                 imgData.getHasAlphaChannel()
             );
 
-            // pixellate input image and return random offsets used
-            int[] offsets = pixellateOffsetAverage(imgDataCopy, size);
+            // pixelate input image and return random offsets used
+            int[] offsets = pixelateOffsetAverage(imgDataCopy, size);
 
             // construct new ImageData objects from deep copy
             ImageData imgDataC = new ImageData(
@@ -112,7 +115,7 @@ public class Comp {
                 imgDataCopy.getHasAlphaChannel()
             );
 
-            // separate each copy of the pixellated ImageData into channels
+            // separate each copy of the pixelated ImageData into channels
             // by performing component-wise multiplication and addition to each
             // pixel (arguments one and two)
             separate(new Pixel(255, 0, 0), new Pixel(0, 255, 255), imgDataC);
@@ -121,7 +124,7 @@ public class Comp {
 
             // apply radiusing filter to each ImageData object and offset
             // depending on which function is called
-            circleCenterOffset(imgDataCopy, size, offsets, Mode.CMY);
+            // circleCenterOffset(imgDataCopy, size, offsets, Mode.CMY);
             circleTopOffset(imgDataC, size, offsets, Mode.CMY);
             circleLeftOffset(imgDataM, size, offsets, Mode.CMY);
             circleRightOffset(imgDataY, size, offsets, Mode.CMY);
@@ -137,7 +140,8 @@ public class Comp {
 
             // composite three channels and radiused original image using
             // darken blend mode
-            results[i] = compositeDarken(new ImageData[]{ imgDataCopy, imgDataC, imgDataM, imgDataY });
+            // results[i] = compositeDarken(new ImageData[]{ imgDataCopy, imgDataC, imgDataM, imgDataY });
+            results[i] = compositeDarken(new ImageData[]{ imgDataC, imgDataM, imgDataY });
 
             try {
                 write(results[i], fileName + "-" + version + "-tri-" + i + "-darken.png");
@@ -161,7 +165,7 @@ public class Comp {
 
     // iteratively calls appropriate filters on imgData object, outputs all
     // channels and compositing results
-    public static void compRGB(ImageData imgData, int levels, String fileName, String version) {
+    public static void compRGB(ImageData imgData, int levels, String fileName, String version, boolean prime) {
         long start = System.currentTimeMillis();
 
         // create results array for future compositing
@@ -175,8 +179,11 @@ public class Comp {
                 break;
             }
 
-            // size of pixel post-pixellation
-            int size = (int) ((double) imgData.getWidth() / Math.pow(randomLevels[i], 2));
+            // size of pixel post-pixelation
+            int size = ((prime) ?
+                (int) ((double) imgData.getWidth() / Math.pow(randomLevels[i], 2))
+                :
+                (int) ((double) imgData.getWidth() / Math.pow(2, i)));
 
             // max resolution for efficiency and fidelity
             if (size < 7) {
@@ -191,8 +198,8 @@ public class Comp {
                 imgData.getHasAlphaChannel()
             );
 
-            // pixellate input image and return random offsets used
-            int[] offsets = pixellateOffsetAverage(imgDataCopy, size);
+            // pixelate input image and return random offsets used
+            int[] offsets = pixelateOffsetAverage(imgDataCopy, size);
 
             // construct new ImageData objects from deep copy
             ImageData imgDataR = new ImageData(
@@ -214,7 +221,7 @@ public class Comp {
                 imgDataCopy.getHasAlphaChannel()
             );
 
-            // separate each copy of the pixellated ImageData into channels
+            // separate each copy of the pixelated ImageData into channels
             // by performing component-wise multiplication and addition to each
             // pixel (arguments one and two)
             separate(new Pixel(255, 0, 0), new Pixel(0, 255), imgDataR);
@@ -223,7 +230,7 @@ public class Comp {
 
             // apply radiusing filter to each ImageData object and offset
             // depending on which function is called
-            circleCenterOffset(imgDataCopy, size, offsets, Mode.RGB);
+            // circleCenterOffset(imgDataCopy, size, offsets, Mode.RGB);
             circleTopOffset(imgDataR, size, offsets, Mode.RGB);
             circleLeftOffset(imgDataG, size, offsets, Mode.RGB);
             circleRightOffset(imgDataB, size, offsets, Mode.RGB);
@@ -239,7 +246,8 @@ public class Comp {
 
             // composite three channels and radiused original image using
             // lighten blend mode
-            results[i] = compositeLighten(new ImageData[]{ imgDataCopy, imgDataR, imgDataG, imgDataB });
+            // results[i] = compositeLighten(new ImageData[]{ imgDataCopy, imgDataR, imgDataG, imgDataB });
+            results[i] = compositeLighten(new ImageData[]{ imgDataR, imgDataG, imgDataB });
 
             try {
                 write(results[i], fileName + "-" + version + "-tri-" + i + "-lighten.png");
@@ -279,51 +287,51 @@ public class Comp {
         System.out.println("separate finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
     }
 
-    // pixellation filter that uses point sampling
-    public static void pixellate(ImageData imgData, int size) {
+    // pixelation filter that uses point sampling
+    public static void pixelate(ImageData imgData, int size) {
         long start = System.currentTimeMillis();
-        // map to pixellate ImageData according to size supplied
+        // map to pixelate ImageData according to size supplied
         ImageData.CoarseMap map = (dest, src, index) -> {
             dest.setPixel(src);
         };
         imgData.applyCoarseMap(map, size);
-        System.out.println("pixellate finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("pixelate finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
     }
 
-    // pixellation filter that uses uniformly weighted averaging over
-    // pixellation area
-    public static void pixellateAverage(ImageData imgData, int size) {
+    // pixelation filter that uses uniformly weighted averaging over
+    // pixelation area
+    public static void pixelateAverage(ImageData imgData, int size) {
         long start = System.currentTimeMillis();
-        // map to pixellate ImageData according to size supplied
+        // map to pixelate ImageData according to size supplied
         ImageData.CoarseMap map = (dest, src, index) -> {
             dest.setPixel(src);
         };
         imgData.applyCoarseMapWithAveraging(map, size);
-        System.out.println("pixellate average finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("pixelate average finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
     }
 
-    // pixellation filter that uses point sampling and row offsetting
-    public static int[] pixellateOffset(ImageData imgData, int size) {
+    // pixelation filter that uses point sampling and row offsetting
+    public static int[] pixelateOffset(ImageData imgData, int size) {
         long start = System.currentTimeMillis();
-        // map to pixellate ImageData according to size supplied
+        // map to pixelate ImageData according to size supplied
         ImageData.CoarseMap map = (dest, src, index) -> {
             dest.setPixel(src);
         };
         int[] offsets = imgData.applyOffsetCoarseMap(map, size);
-        System.out.println("pixellate offset finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("pixelate offset finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
         return offsets;
     }
 
-    // pixellation filter that uses uniformly weighted averaging over
-    // pixellation area and row offsetting
-    public static int[] pixellateOffsetAverage(ImageData imgData, int size) {
+    // pixelation filter that uses uniformly weighted averaging over
+    // pixelation area and row offsetting
+    public static int[] pixelateOffsetAverage(ImageData imgData, int size) {
         long start = System.currentTimeMillis();
-        // map to pixellate ImageData according to size supplied
+        // map to pixelate ImageData according to size supplied
         ImageData.CoarseMap map = (dest, src, index) -> {
             dest.setPixel(src);
         };
         int[] offsets = imgData.applyOffsetCoarseMapWithAveraging(map, size);
-        System.out.println("pixellate offset average finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("pixelate offset average finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
         return offsets;
     }
 
@@ -335,7 +343,7 @@ public class Comp {
         ImageData.IndexedMap circleMap = (p, index) -> {
             // calculate x and y coordinates from one-dimensional index
             int[] index2D = imgData.index2D(index);
-            // calculate position within pixellated area
+            // calculate position within pixelated area
             int xLoc = index2D[1] % size;
             int yLoc = index2D[0] % size;
             // calculate radius based on intensity of pixel and channel mode
@@ -360,7 +368,7 @@ public class Comp {
         ImageData.IndexedMap circleMap = (p, index) -> {
             // calculate x and y coordinates from one-dimensional index
             int[] index2D = imgData.index2D(index);
-            // calculate position within pixellated area
+            // calculate position within pixelated area
             int xLoc = index2D[1] % size;
             int yLoc = index2D[0] % size;
             // calculate radius based on intensity of pixel and channel mode
@@ -385,7 +393,7 @@ public class Comp {
         ImageData.IndexedMap circleMap = (p, index) -> {
             // calculate x and y coordinates from one-dimensional index
             int[] index2D = imgData.index2D(index);
-            // calculate position within pixellated area
+            // calculate position within pixelated area
             int xLoc = index2D[1] % size;
             int yLoc = index2D[0] % size;
             // calculate radius based on intensity of pixel and channel mode
@@ -410,7 +418,7 @@ public class Comp {
         ImageData.IndexedMap circleMap = (p, index) -> {
             // calculate x and y coordinates from one-dimensional index
             int[] index2D = imgData.index2D(index);
-            // calculate position within pixellated area
+            // calculate position within pixelated area
             int xLoc = index2D[1] % size;
             int yLoc = index2D[0] % size;
             // calculate radius based on intensity of pixel and channel mode
@@ -435,7 +443,7 @@ public class Comp {
         ImageData.IndexedMap circleMap = (p, index) -> {
             // calculate x and y coordinates from one-dimensional index
             int[] index2D = imgData.index2D(index);
-            // calculate position within pixellated area
+            // calculate position within pixelated area
             int xLoc = index2D[1] % size;
             int yLoc = index2D[0] % size;
             // calculate radius based on intensity of pixel and channel mode
@@ -460,7 +468,7 @@ public class Comp {
         ImageData.IndexedMap circleMap = (p, index) -> {
             // calculate x and y coordinates from one-dimensional index
             int[] index2D = imgData.index2D(index);
-            // calculate position within pixellated area
+            // calculate position within pixelated area
             int xLoc = index2D[1] % size;
             int yLoc = index2D[0] % size;
             // calculate radius based on intensity of pixel and channel mode
@@ -485,7 +493,7 @@ public class Comp {
         ImageData.IndexedMap circleMap = (p, index) -> {
             // calculate x and y coordinates from one-dimensional index
             int[] index2D = imgData.index2D(index);
-            // calculate position within pixellated area
+            // calculate position within pixelated area
             int xLoc = index2D[1] % size;
             int yLoc = index2D[0] % size;
             // calculate radius based on intensity of pixel and channel mode
@@ -510,7 +518,7 @@ public class Comp {
         ImageData.IndexedMap circleMap = (p, index) -> {
             // calculate x and y coordinates from one-dimensional index
             int[] index2D = imgData.index2D(index);
-            // calculate position within pixellated area
+            // calculate position within pixelated area
             int xLoc = index2D[1] % size;
             int yLoc = index2D[0] % size;
             // calculate radius based on intensity of pixel and channel mode

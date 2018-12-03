@@ -61,8 +61,8 @@ public class ImageData {
         this.data = new Pixel[height][width];
         // marshall differently depending on presence of alpha data
         if (hasAlphaChannel) {
-            final int pixelLength = 4;
-            for (int pixel = 0, row = 0, col = 0; pixel < pixels.length; pixel += pixelLength) {
+            final int pixelength = 4;
+            for (int pixel = 0, row = 0, col = 0; pixel < pixels.length; pixel += pixelength) {
                 // marshalling from byte to Pixel object
                 data[row][col] = new Pixel(
                     (int) pixels[pixel + 3] & 0xff, // red
@@ -77,8 +77,8 @@ public class ImageData {
                 }
             }
         } else {
-            final int pixelLength = 3;
-            for (int pixel = 0, row = 0, col = 0; pixel < pixels.length; pixel += pixelLength) {
+            final int pixelength = 3;
+            for (int pixel = 0, row = 0, col = 0; pixel < pixels.length; pixel += pixelength) {
                 // marshalling from byte to Pixel object
                 data[row][col] = new Pixel(
                     (int) pixels[pixel + 2] & 0xff, // red
@@ -174,7 +174,7 @@ public class ImageData {
             for (int j = 0; j < height; j++) {
                 // calculate one-dimensional index
                 int index = (i + j * width);
-                // src pixel selected from pixellation area using point sampling
+                // src pixel selected from pixelation area using point sampling
                 map.apply(
                     data[j][i],
                     data[clamp((int) Math.floor(j / size) * size + size/2, 0, height - 1)][clamp((int) Math.floor(i / size) * size + size/2, 0, width - 1)],
@@ -186,16 +186,16 @@ public class ImageData {
 
     // apply coarse map to every pixel in ImageData object using averaging
     public void applyCoarseMapWithAveraging(CoarseMap map, int size) {
-        // store averages for each pixellation area
+        // store averages for each pixelation area
         Pixel[][] averages = new Pixel[height / size + 1][width / size + 1];
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                // if average for this pixellatino area hasn't yet been
+                // if average for this pixelatino area hasn't yet been
                 // calculated, calculate
                 if (averages[j / size][i / size] == null) {
                     Pixel average = new Pixel(0, 255);
                     int weight = 0;
-                    // sum pixels in pixellation area
+                    // sum pixels in pixelation area
                     for (int k = i; k < i + size; k++) {
                         for (int l = j; l < j + size; l++) {
                             if (k < 0 || k > width - 1 || l < 0 || l > height - 1) {
@@ -233,7 +233,7 @@ public class ImageData {
                 }
                 // calculate one-dimensional index
                 int index = (i + j * width);
-                // src pixel selected from pixellation area using point sampling
+                // src pixel selected from pixelation area using point sampling
                 map.apply(
                     data[j][clamp((i + offsets[j / size] + width) % width, 0, width - 1)],
                     data[clamp((int) Math.floor(j / size) * size + size/2, 0, height - 1)][clamp((int) (Math.floor(i / size) * size + size/2 + offsets[j / size] + width) % width, 0, width - 1)],
@@ -248,7 +248,7 @@ public class ImageData {
     // apply coarse map to every pixel in ImageData object using averaging with
     // rows offset
     public int[] applyOffsetCoarseMapWithAveraging(CoarseMap map, int size) {
-        // store averages for each pixellation area
+        // store averages for each pixelation area
         Pixel[][] averages = new Pixel[height / size + 1][width / size + 1];
         // keep track of row offsets
         int[] offsets = new int[height / size + 1];
@@ -258,12 +258,12 @@ public class ImageData {
                 while (offsets[j / size] == 0) {
                     offsets[j / size] = (int) (Math.random() * size) - size/2;
                 }
-                // if average for this pixellatino area hasn't yet been
+                // if average for this pixelatino area hasn't yet been
                 // calculated, calculate
                 if (averages[j / size][i / size] == null) {
                     Pixel average = new Pixel(0, 255);
                     int weight = 0;
-                    // sum pixels in pixellation area
+                    // sum pixels in pixelation area
                     for (int k = i + offsets[j / size]; k < i + size + offsets[j / size]; k++) {
                         for (int l = j; l < j + size; l++) {
                             average.setPixel(average.add(data[clamp(l, 0, height - 1)][clamp((k + width) % width, 0, width - 1)]));
