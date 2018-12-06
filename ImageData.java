@@ -13,7 +13,11 @@ import java.awt.image.DataBufferByte;
 /*
 /*----------------------------------------------------------------------------*/
 
+
 public class ImageData {
+
+    // used to decide whether to use alpha channel
+    public enum FileType { JPG, PNG };
 
     // pixel array
     private Pixel[][] data;
@@ -116,10 +120,10 @@ public class ImageData {
     }
 
     // utility function to marshall ImageData object to BufferedImage object
-    public void toImage(BufferedImage img) {
+    public void toImage(BufferedImage img, FileType fileType) {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                img.setRGB(i, j, data[j][i].toInt());
+                img.setRGB(i, j, ((fileType == FileType.PNG) ? data[j][i].toInt() : data[j][i].toIntNoAlpha()));
             }
         }
     }

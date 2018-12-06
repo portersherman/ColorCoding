@@ -1,6 +1,6 @@
 # Color Coding
 
-## Comp.java
+## ColorCode.java
 
 Comp implements an iterative image filter based on the decomposition and
 reconstruction of the input image. The effect makes use of a number of
@@ -26,11 +26,11 @@ operations.
 
 ## Building
 
-Build from CLI using command: `javac Comp.java`
+Build from CLI using command: `javac ColorCode.java`
 Tested using Java 1.8
 
 ## Running
 
-Run from CLI using command: `java Comp <filename> <depth> <version string>`
+Run from CLI using command: `java ColorCode <filename> <depth> <version string>`
 
 Author: Porter Sherman

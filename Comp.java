@@ -24,10 +24,10 @@ import javax.imageio.ImageIO;
 /*
 /*----------------------------------------------------------------------------*/
 
-// used to determine how to calculate pixel intensity during radiusing
-enum Mode { RGB, CMY };
-
 public class Comp {
+
+    // used to determine how to calculate pixel intensity during radiusing
+    public enum Mode { RGB, CMY };
 
     // prime numbers used to mitigate interference in composited image
     private static int[] randomLevels = { 1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37 };
@@ -93,7 +93,7 @@ public class Comp {
             );
 
             // pixelate input image and return random offsets used
-            int[] offsets = pixelateOffsetAverage(imgDataCopy, size);
+            pixelateAverage(imgDataCopy, size);
 
             // construct new ImageData objects from deep copy
             ImageData imgDataC = new ImageData(
@@ -125,15 +125,15 @@ public class Comp {
             // apply radiusing filter to each ImageData object and offset
             // depending on which function is called
             // circleCenterOffset(imgDataCopy, size, offsets, Mode.CMY);
-            circleTopOffset(imgDataC, size, offsets, Mode.CMY);
-            circleLeftOffset(imgDataM, size, offsets, Mode.CMY);
-            circleRightOffset(imgDataY, size, offsets, Mode.CMY);
+            circleTop(imgDataC, size, Mode.CMY);
+            circleLeft(imgDataM, size, Mode.CMY);
+            circleRight(imgDataY, size, Mode.CMY);
 
             try {
-                write(imgDataC, fileName + "-" + version + "-tri-" + i + "-C.png");
-                write(imgDataM, fileName + "-" + version + "-tri-" + i + "-M.png");
-                write(imgDataY, fileName + "-" + version + "-tri-" + i + "-Y.png");
-                write(imgDataCopy, fileName + "-" + version + "-tri-" + i + "-CMY-all.png");
+                write(imgDataC, fileName + "-" + version + "-tri-" + i + "-C");
+                write(imgDataM, fileName + "-" + version + "-tri-" + i + "-M");
+                write(imgDataY, fileName + "-" + version + "-tri-" + i + "-Y");
+                // write(imgDataCopy, fileName + "-" + version + "-tri-" + i + "-CMY-allg");
             } catch (IOException e) {
                 System.out.println(e);
             }
@@ -144,7 +144,7 @@ public class Comp {
             results[i] = compositeDarken(new ImageData[]{ imgDataC, imgDataM, imgDataY });
 
             try {
-                write(results[i], fileName + "-" + version + "-tri-" + i + "-darken.png");
+                write(results[i], fileName + "-" + version + "-tri-" + i + "-darken");
             } catch (IOException e) {
                 System.out.println(e);
             }
@@ -155,7 +155,7 @@ public class Comp {
         ImageData imgDataRes = compositeNormal(results);
 
         try {
-            write(imgDataRes, fileName + "-" + version + "-tri-" + levels + "-CMY-normal.png");
+            write(imgDataRes, fileName + "-" + version + "-tri-" + levels + "-CMY-normalg");
         } catch (IOException e) {
             System.out.println(e);
         }
@@ -199,7 +199,7 @@ public class Comp {
             );
 
             // pixelate input image and return random offsets used
-            int[] offsets = pixelateOffsetAverage(imgDataCopy, size);
+            pixelateAverage(imgDataCopy, size);
 
             // construct new ImageData objects from deep copy
             ImageData imgDataR = new ImageData(
@@ -231,15 +231,15 @@ public class Comp {
             // apply radiusing filter to each ImageData object and offset
             // depending on which function is called
             // circleCenterOffset(imgDataCopy, size, offsets, Mode.RGB);
-            circleTopOffset(imgDataR, size, offsets, Mode.RGB);
-            circleLeftOffset(imgDataG, size, offsets, Mode.RGB);
-            circleRightOffset(imgDataB, size, offsets, Mode.RGB);
+            circleTop(imgDataR, size, Mode.RGB);
+            circleLeft(imgDataG, size, Mode.RGB);
+            circleRight(imgDataB, size, Mode.RGB);
 
             try {
-                write(imgDataR, fileName + "-" + version + "-tri-" + i + "-R.png");
-                write(imgDataG, fileName + "-" + version + "-tri-" + i + "-G.png");
-                write(imgDataB, fileName + "-" + version + "-tri-" + i + "-B.png");
-                write(imgDataCopy, fileName + "-" + version + "-tri-" + i + "-RGB-all.png");
+                write(imgDataR, fileName + "-" + version + "-tri-" + i + "-R");
+                write(imgDataG, fileName + "-" + version + "-tri-" + i + "-G");
+                write(imgDataB, fileName + "-" + version + "-tri-" + i + "-B");
+                // write(imgDataCopy, fileName + "-" + version + "-tri-" + i + "-RGB-all");
             } catch (IOException e) {
                 System.out.println(e);
             }
@@ -250,7 +250,7 @@ public class Comp {
             results[i] = compositeLighten(new ImageData[]{ imgDataR, imgDataG, imgDataB });
 
             try {
-                write(results[i], fileName + "-" + version + "-tri-" + i + "-lighten.png");
+                write(results[i], fileName + "-" + version + "-tri-" + i + "-lighten");
             } catch (IOException e) {
                 System.out.println(e);
             }
@@ -266,7 +266,7 @@ public class Comp {
         ImageData imgDataRes = compositeNormal(results);
 
         try {
-            write(imgDataRes, fileName + "-" + version + "-tri-" + levels + "-RGB-normal.png");
+            write(imgDataRes, fileName + "-" + version + "-tri-" + levels + "-RGB-normal");
         } catch (IOException e) {
             System.out.println(e);
         }
@@ -307,7 +307,7 @@ public class Comp {
             dest.setPixel(src);
         };
         imgData.applyCoarseMapWithAveraging(map, size);
-        System.out.println("pixelate average finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("pixelateAverage finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
     }
 
     // pixelation filter that uses point sampling and row offsetting
@@ -318,7 +318,7 @@ public class Comp {
             dest.setPixel(src);
         };
         int[] offsets = imgData.applyOffsetCoarseMap(map, size);
-        System.out.println("pixelate offset finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("pixelateOffset finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
         return offsets;
     }
 
@@ -331,7 +331,7 @@ public class Comp {
             dest.setPixel(src);
         };
         int[] offsets = imgData.applyOffsetCoarseMapWithAveraging(map, size);
-        System.out.println("pixelate offset average finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("pixelateOffsetAverage finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
         return offsets;
     }
 
@@ -350,14 +350,14 @@ public class Comp {
             int radius = (int) (((double) size / 4) + ((double) size / 4) * ((mode == Mode.CMY) ? (1 - (double) p.getMin() / 255) : (double) p.getMax() / 255));
             if (Math.sqrt(Math.abs(xLoc - (double) size/2) * Math.abs(xLoc - (double) size/2) + Math.abs(yLoc - (double) size/2) * Math.abs(yLoc - (double) size/2)) > (double) radius) {
                 // outside of radius, set to transparent
-                p.setOpacity(0.0);
+                p.setPixel(((mode == Mode.CMY) ? new Pixel(255, 0) : new Pixel(0, 0)));
             } else if (Math.sqrt(Math.abs(xLoc - (double) size/2) * Math.abs(xLoc - (double) size/2) + Math.abs(yLoc - (double) size/2) * Math.abs(yLoc - (double) size/2)) > (double) radius - 1) {
                 // outside of radius - 1, set to half opacity for anti-aliasing
                 p.setOpacity(0.5);
             }
         };
         imgData.applyIndexedMap(circleMap);
-        System.out.println("circle finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("circleCenter finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
     }
 
     // radiusing filter relative to top center
@@ -375,14 +375,14 @@ public class Comp {
             int radius = (int) (((double) size / 4) + ((double) size / 4) * ((mode == Mode.CMY) ? (1 - (double) p.getMin() / 255) : (double) p.getMax() / 255));
             if (Math.sqrt(Math.abs(xLoc - (double) size/2) * Math.abs(xLoc - (double) size/2) + Math.abs(yLoc - radius) * Math.abs(yLoc - radius)) > (double) radius) {
                 // outside of radius, set to transparent
-                p.setOpacity(0.0);
+                p.setPixel(((mode == Mode.CMY) ? new Pixel(255, 0) : new Pixel(0, 0)));
             } else if (Math.sqrt(Math.abs(xLoc - (double) size/2) * Math.abs(xLoc - (double) size/2) + Math.abs(yLoc - radius) * Math.abs(yLoc - radius)) > (double) radius - 1) {
                 // outside of radius - 1, set to half opacity for anti-aliasing
                 p.setOpacity(0.5);
             }
         };
         imgData.applyIndexedMap(circleMap);
-        System.out.println("circle finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("circleTop finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
     }
 
     // radiusing filter relative to bottom left
@@ -400,14 +400,14 @@ public class Comp {
             int radius = (int) (((double) size / 4) + ((double) size / 4) * ((mode == Mode.CMY) ? (1 - (double) p.getMin() / 255) : (double) p.getMax() / 255));
             if (Math.sqrt(Math.abs(xLoc - radius) * Math.abs(xLoc - radius) + Math.abs(yLoc - (size - radius)) * Math.abs(yLoc - (size - radius))) > (double) radius) {
                 // outside of radius, set to transparent
-                p.setOpacity(0.0);
+                p.setPixel(((mode == Mode.CMY) ? new Pixel(255, 0) : new Pixel(0, 0)));
             } else if (Math.sqrt(Math.abs(xLoc - radius) * Math.abs(xLoc - radius) + Math.abs(yLoc - (size - radius)) * Math.abs(yLoc - (size - radius))) > (double) radius - 1) {
                 // outside of radius - 1, set to half opacity for anti-aliasing
                 p.setOpacity(0.5);
             }
         };
         imgData.applyIndexedMap(circleMap);
-        System.out.println("circle finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("circleLeft finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
     }
 
     // radiusing filter relative to bottom right
@@ -425,14 +425,14 @@ public class Comp {
             int radius = (int) (((double) size / 4) + ((double) size / 4) * ((mode == Mode.CMY) ? (1 - (double) p.getMin() / 255) : (double) p.getMax() / 255));
             if (Math.sqrt(Math.abs(xLoc - (size - radius)) * Math.abs(xLoc - (size - radius)) + Math.abs(yLoc - (size - radius)) * Math.abs(yLoc - (size - radius))) > (double) radius) {
                 // outside of radius, set to transparent
-                p.setOpacity(0.0);
+                p.setPixel(((mode == Mode.CMY) ? new Pixel(255, 0) : new Pixel(0, 0)));
             } else if (Math.sqrt(Math.abs(xLoc - (size - radius)) * Math.abs(xLoc - (size - radius)) + Math.abs(yLoc - (size - radius)) * Math.abs(yLoc - (size - radius))) > (double) radius - 1) {
                 // outside of radius - 1, set to half opacity for anti-aliasing
                 p.setOpacity(0.5);
             }
         };
         imgData.applyIndexedMap(circleMap);
-        System.out.println("circle finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("circleRight finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
     }
 
     // offset radiusing filter relative to center
@@ -450,14 +450,14 @@ public class Comp {
             int radius = (int) (((double) size / 4) + ((double) size / 4) * ((mode == Mode.CMY) ? (1 - (double) p.getMin() / 255) : (double) p.getMax() / 255));
             if (Math.sqrt(Math.abs(xLoc - (double) size/2) * Math.abs(xLoc - (double) size/2) + Math.abs(yLoc - (double) size/2) * Math.abs(yLoc - (double) size/2)) > (double) radius) {
                 // outside of radius, set to transparent
-                p.setOpacity(0.0);
+                p.setPixel(((mode == Mode.CMY) ? new Pixel(255, 0) : new Pixel(0, 0)));
             } else if (Math.sqrt(Math.abs(xLoc - (double) size/2) * Math.abs(xLoc - (double) size/2) + Math.abs(yLoc - (double) size/2) * Math.abs(yLoc - (double) size/2)) > (double) radius - 1) {
                 // outside of radius - 1, set to half opacity for anti-aliasing
                 p.setOpacity(0.5);
             }
         };
         imgData.applyIndexedMapWithOffsets(circleMap, size, offsets);
-        System.out.println("circle finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("circleCenterOffset finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
     }
 
     // offset radiusing filter relative to top center
@@ -475,14 +475,14 @@ public class Comp {
             int radius = (int) (((double) size / 4) + ((double) size / 4) * ((mode == Mode.CMY) ? (1 - (double) p.getMin() / 255) : (double) p.getMax() / 255));
             if (Math.sqrt(Math.abs(xLoc - (double) size/2) * Math.abs(xLoc - (double) size/2) + Math.abs(yLoc - radius) * Math.abs(yLoc - radius)) > (double) radius) {
                 // outside of radius, set to transparent
-                p.setOpacity(0.0);
+                p.setPixel(((mode == Mode.CMY) ? new Pixel(255, 0) : new Pixel(0, 0)));
             } else if (Math.sqrt(Math.abs(xLoc - (double) size/2) * Math.abs(xLoc - (double) size/2) + Math.abs(yLoc - radius) * Math.abs(yLoc - radius)) > (double) radius - 1) {
                 // outside of radius - 1, set to half opacity for anti-aliasing
                 p.setOpacity(0.5);
             }
         };
         imgData.applyIndexedMapWithOffsets(circleMap, size, offsets);
-        System.out.println("circle finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("circleTopOffset finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
     }
 
     // offset radiusing filter relative to bottom left
@@ -500,14 +500,14 @@ public class Comp {
             int radius = (int) (((double) size / 4) + ((double) size / 4) * ((mode == Mode.CMY) ? (1 - (double) p.getMin() / 255) : (double) p.getMax() / 255));
             if (Math.sqrt(Math.abs(xLoc - radius) * Math.abs(xLoc - radius) + Math.abs(yLoc - (size - radius)) * Math.abs(yLoc - (size - radius))) > (double) radius) {
                 // outside of radius, set to transparent
-                p.setOpacity(0.0);
+                p.setPixel(((mode == Mode.CMY) ? new Pixel(255, 0) : new Pixel(0, 0)));
             } else if (Math.sqrt(Math.abs(xLoc - radius) * Math.abs(xLoc - radius) + Math.abs(yLoc - (size - radius)) * Math.abs(yLoc - (size - radius))) > (double) radius - 1) {
                 // outside of radius - 1, set to half opacity for anti-aliasing
                 p.setOpacity(0.5);
             }
         };
         imgData.applyIndexedMapWithOffsets(circleMap, size, offsets);
-        System.out.println("circle finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("circleLeftOffset finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
     }
 
     // offset radiusing filter relative to bottom right
@@ -525,14 +525,14 @@ public class Comp {
             int radius = (int) (((double) size / 4) + ((double) size / 4) * ((mode == Mode.CMY) ? (1 - (double) p.getMin() / 255) : (double) p.getMax() / 255));
             if (Math.sqrt(Math.abs(xLoc - (size - radius)) * Math.abs(xLoc - (size - radius)) + Math.abs(yLoc - (size - radius)) * Math.abs(yLoc - (size - radius))) > (double) radius) {
                 // outside of radius, set to transparent
-                p.setOpacity(0.0);
+                p.setPixel(((mode == Mode.CMY) ? new Pixel(255, 0) : new Pixel(0, 0)));
             } else if (Math.sqrt(Math.abs(xLoc - (size - radius)) * Math.abs(xLoc - (size - radius)) + Math.abs(yLoc - (size - radius)) * Math.abs(yLoc - (size - radius))) > (double) radius - 1) {
                 // outside of radius - 1, set to half opacity for anti-aliasing
                 p.setOpacity(0.5);
             }
         };
         imgData.applyIndexedMapWithOffsets(circleMap, size, offsets);
-        System.out.println("circle finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("circleRightOffset finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
     }
 
     // compositing filter using darken blend mode
@@ -565,7 +565,7 @@ public class Comp {
         };
         imgDataRes.applyIndexedMap(map);
 
-        System.out.println("composite darken finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("compositeDarken finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
         return imgDataRes;
     }
 
@@ -599,7 +599,7 @@ public class Comp {
         };
         imgDataRes.applyIndexedMap(map);
 
-        System.out.println("composite lighten finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("compositLighten finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
         return imgDataRes;
     }
 
@@ -634,7 +634,7 @@ public class Comp {
         };
         imgDataRes.applyIndexedMap(map);
 
-        System.out.println("composite normal finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        System.out.println("compositeNormal finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
         return imgDataRes;
     }
 
@@ -645,13 +645,13 @@ public class Comp {
         BufferedImage outImg = new BufferedImage(
             imgData.getWidth(),
             imgData.getHeight(),
-            BufferedImage.TYPE_INT_ARGB
+            BufferedImage.TYPE_INT_RGB
         );
-        // marshall image object to buffered iamge object
-        imgData.toImage(outImg);
+        // marshall image object to buffered image object
+        imgData.toImage(outImg, ImageData.FileType.JPG);
         // write file
-        File outFile = new File(fileName);
-        ImageIO.write(outImg, "png", outFile);
-        System.out.println("write finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
+        File outFile = new File(fileName + ".jpg");
+        ImageIO.write(outImg, "jpg", outFile);
+        System.out.println("write " + fileName + ".jpg finished: " + (((double) System.currentTimeMillis() - start) / 1000) + "s");
     }
 }

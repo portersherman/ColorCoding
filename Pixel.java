@@ -255,6 +255,11 @@ public class Pixel{
         return (this.a << 24) | (this.r << 16) | (this.g << 8) | this.b;
     }
 
+    // utility function to convert to int without alpha for marshalling
+    public int toIntNoAlpha() {
+        return (this.r << 16) | (this.g << 8) | this.b;
+    }
+
     // clamp function to keep RGBA values in gamut
     public void clamp() {
         this.r = (this.r > 255) ? 255 : (this.r < 0) ? 0 : this.r;
